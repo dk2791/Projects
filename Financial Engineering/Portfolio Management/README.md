@@ -5,4 +5,4 @@ This project attempts to implement the research paper:
 
 The current status is: `working in progress`.
 
-To view the work until now, please find `prelim.ipynb`.
+To view the work until now, please find `prelim_v2.ipynb` or `prelim_v2.html`.
