@@ -14,7 +14,7 @@ Below are a few visualizations of results
 
 Accessible at https://public.tableau.com/profile/donggeun.kim#!/vizhome/Portfolio_Weights/Story1
 
-![image](./image/Story1.png)
+![image](./image/Story1_1.png)
 
 ![image](./image/Story1_2.png)
 
@@ -24,7 +24,6 @@ Accessible at https://public.tableau.com/profile/donggeun.kim#!/vizhome/Portfoli
 
 ![image](./image/Story1_5.png)
 
+![image](./image/Story1_6.png)
 
-```python
 
-```
