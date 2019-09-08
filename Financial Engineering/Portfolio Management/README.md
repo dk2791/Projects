@@ -7,7 +7,7 @@ To view the work until now, please find `Implementation_Exercise.ipynb`.
 
 Below are a few visualizations of results
 
-### 1. Monthly DAA Portfolio Weights
+### Monthly DAA Portfolio Weights
 
 Accessible at https://public.tableau.com/profile/donggeun.kim#!/vizhome/Portfolio_Weights/Story1
 
