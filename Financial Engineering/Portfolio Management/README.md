@@ -12,7 +12,7 @@ Below are a few visualizations of results
 
 ### Monthly DAA Portfolio Weights
 
-Accessible at https://public.tableau.com/profile/donggeun.kim#!/vizhome/Portfolio_Weights/Story1
+Interactive Visualization by Tableau Accessible at https://public.tableau.com/profile/donggeun.kim#!/vizhome/Portfolio_Weights/Story1
 
 ![image](./image/Story1_1.png)
 
