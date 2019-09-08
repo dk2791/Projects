@@ -4,10 +4,12 @@ This project attempts to implement the research paper:
 #### by _Himanshu Almadi, David E. Rapach, and Anil Suri_
 
 To view the work until now, please find `Implementation_Exercise.ipynb`.
+However, the file is too large for smooth viewing at Github.
+In this case, please refer to `Implementation_Exercise.md`.
 
 Below are a few visualizations of results
 
-### 1. Monthly DAA Portfolio Weights
+### Monthly DAA Portfolio Weights
 
 Accessible at https://public.tableau.com/profile/donggeun.kim#!/vizhome/Portfolio_Weights/Story1
 
