@@ -5,7 +5,8 @@ This project attempts to implement the research paper:
 
 To view the work until now, please find `Implementation_Exercise.ipynb`.
 However, the file is too large for smooth viewing at Github.
-In this case, please refer to `Implementation_Exercise.md`.
+In this case, please refer to `Implementation_Exercise.md` in `Implementation_Exercise` Folder.
+The problem with `Implementation_Exercise.md` is that Markdown Math Equations are not rendered.
 
 Below are a few visualizations of results
 
