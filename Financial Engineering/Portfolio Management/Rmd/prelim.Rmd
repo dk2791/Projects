@@ -1,6 +1,6 @@
 ---
 title: "Investigating Portfolio Weights"
-output: html_document
+output: pdf_document
 ---
 I examined the possibility of ARIMA-GARCH to capture insights about the estimated portfolio weights. Although the fitted ARIMA(1,0,1)-GARCH(1,1) model showed significant p-values, residuals failed normality tests raising concerns about stationarity/ergodicity of the random variable. 
 
