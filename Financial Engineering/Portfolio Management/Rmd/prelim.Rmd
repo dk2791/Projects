@@ -1,0 +1,54 @@
+---
+title: "Investigating Portfolio Weights"
+output: html_document
+---
+I examined the possibility of ARIMA-GARCH to capture insights about the estimated portfolio weights. Although the fitted ARIMA(1,0,1)-GARCH(1,1) model showed significant p-values, residuals failed normality tests raising concerns about stationarity/ergodicity of the random variable. 
+
+```{r include = FALSE}
+library(forecast)
+library(lmtest)
+library(rugarch)
+library(car)
+library(nortest)
+```
+
+
+
+## ACF and PACF for Stocks and Bonds
+
+1) Observed there is an evidence of autocorrelation/partial-autocorrelation.
+
+2) Variance changed over time suggesting heteroskedasticity.
+
+```{r include = FALSE}
+setwd("~/Documents/GitHub/Projects/Financial Engineering/Portfolio Management")
+weights_data <- read.csv(file="./weight.csv")
+```
+
+```{r}
+w_stock <- ts (weights_data['w_stock'], frequency = 12, start = c(1991, 3)) 
+w_bond <- ts (weights_data['w_bond'], frequency = 12, start = c(1991, 3)) 
+w_stock %>%  ggtsdisplay(main="")
+w_bond %>%  ggtsdisplay(main="")
+
+```
+
+Thus, I firstly fitted ARIMA-GARCH
+```{r}
+spec = ugarchspec(
+  variance.model=list(model="sGARCH", garchOrder=c(1,1),include.mean=FALSE), 
+  mean.model=list(armaOrder=c(1,1),include.mean=TRUE),distribution.model="norm")
+fit_stock=ugarchfit(spec=spec,data=w_stock)
+fit_stock 
+```
+
+I tested normality of stock weights based on Q-Q plot and
+Then, I tested normality of residuals to see whether statistical tests would be valuable. For example, the significance of coefficients would be based on asymptotic normality of the random variabble. If the random variable is not stationary then it may be the case that more complicated considerations such as non-ergodicity play a role in asymptotic convergence.
+
+```{r}
+residuals(fit_stock) %>%  ggtsdisplay(main="")
+residuals(fit_stock) %>% qqnorm(,main="QQ plot of normal data")
+qqline(residuals(fit_stock))
+```
+
+Combining results on QQ-plot and Anderson-Darling test for normality, it is difficult to conclude that the random variable is normally distributed. The QQ-plot is far from linear.
