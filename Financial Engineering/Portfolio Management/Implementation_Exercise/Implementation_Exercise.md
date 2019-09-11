@@ -1,5 +1,5 @@
 
-# Implementation Exercise: Work in Progress
+# Implementation Exercise:
 ### _Return Predictability and Dynamic Asset Allocation: How Often Should Investors Rebalance?_
 by _Himanshu Almadi, David E. Rapach, and Anil Suri_
 
@@ -562,7 +562,8 @@ Compare 14th row with following for sanity check:
 
 
 ```python
-np.log(sum(other_df['SPXDIV Index'][2:14])) - np.log(other_df['SPX Index'][14])
+np.log(sum(other_df['SPXDIV Index'][2:14])) \
+- np.log(other_df['SPX Index'][14])
 ```
 
 
@@ -744,7 +745,8 @@ The difference between Moody's BAA and AAA rated corporate Bond yields
 
 
 ```python
-df['Default_Spread']=other_df['MOODCBAA Index'] - other_df['MOODCAAA Index']
+df['Default_Spread']=other_df['MOODCBAA Index'] \
+                        - other_df['MOODCAAA Index']
 ```
 
 
@@ -995,7 +997,7 @@ df_bonds['Close'][:12].mean()
 
 
 ```python
-Bond_Moving_Average_6 = Bond_Moving_Average_12 = df_bonds['Close'].rolling(6).mean()
+Bond_Moving_Average_6 = df_bonds['Close'].rolling(6).mean()
 ```
 
 
@@ -1035,12 +1037,14 @@ If `SPX Index` value is greater than its 12 months moving average, then assign 1
 
 
 ```python
-MA_nan = (other_df['SPX Index']-Moving_Average_12).apply(lambda x: np.nan if np.isnan(x) else 0)
+MA_nan = ((other_df['SPX Index']-Moving_Average_12)
+          .apply(lambda x: np.nan if np.isnan(x) else 0))
 ```
 
 
 ```python
-df['MA_1_12']=(other_df['SPX Index']-Moving_Average_12).apply(lambda x: 1 if x>0 else 0) + MA_nan
+df['MA_1_12']=((other_df['SPX Index']-Moving_Average_12)
+               .apply(lambda x: 1 if x>0 else 0) + MA_nan)
 ```
 
 
@@ -1132,7 +1136,8 @@ If `Moving_Average_2` value is greater than `Moving_Average_12` value, then assi
 
 
 ```python
-df['MA_2_12']=(Moving_Average_2-Moving_Average_12).apply(lambda x: 1 if x>0 else 0) + MA_nan
+df['MA_2_12']=((Moving_Average_2-Moving_Average_12)
+               .apply(lambda x: 1 if x>0 else 0) + MA_nan)
 ```
 
 
@@ -1215,8 +1220,9 @@ MOMBY_6_nan = (df_bonds['Close']-Bond_Moving_Average_6
 
 
 ```python
-df['MOMBY_6']=(df_bonds['Close']-Bond_Moving_Average_6
-              ).apply(lambda x: -1 if x>0.05 else (1 if x<0.05 else 0)) + MOMBY_6_nan
+df['MOMBY_6']=((df_bonds['Close']-Bond_Moving_Average_6
+              ).apply(lambda x: -1 if x>0.05 else (1 if x<0.05 else 0)) 
+               + MOMBY_6_nan)
 ```
 
 
@@ -1291,8 +1297,9 @@ MOMBY_12_nan = (df_bonds['Close']-Bond_Moving_Average_12
 
 
 ```python
-df['MOMBY_12']=(df_bonds['Close']-Bond_Moving_Average_12
-              ).apply(lambda x: -1 if x>0.05 else (1 if x<0.05 else 0)) + MOMBY_12_nan
+df['MOMBY_12']=((df_bonds['Close']-Bond_Moving_Average_12)
+                .apply(lambda x: -1 if x>0.05 else (1 if x<0.05 else 0))
+                + MOMBY_12_nan)
 ```
 
 
@@ -1550,22 +1557,39 @@ def beta_est(obs):
     estimates beta of ols to minimize l2 norm
     """
     y = np.log(other_df['IP Index'].dropna())[:obs]
-    X = np.concatenate((np.ones(obs).reshape(-1,1),np.arange(obs).reshape(-1,1)),axis=1)
-    X = np.concatenate((X,(np.arange(obs)**2).reshape(-1,1)),axis=1)
-    beta_hat = np.dot(np.matmul(np.linalg.inv(1e-6 *np.eye(3) + np.matmul(X.transpose(),X)),
-                                X.transpose()),y.values.reshape(-1,1))
+    X = np.concatenate((np.ones(obs).reshape(-1,1),
+                        np.arange(obs).reshape(-1,1)),
+                       axis=1)
+    X = np.concatenate((X,(np.arange(obs)**2)
+                        .reshape(-1,1)),
+                       axis=1)
+    beta_hat = np.dot(
+                  np.matmul(
+                      np.linalg.inv(
+                          1e-6 *np.eye(3) 
+                          + np.matmul(X.transpose(),X)),
+                            X.transpose()),
+                  y.values.reshape(-1,1))
     return beta_hat
 ```
 
 
 ```python
 n = len(np.log(other_df['IP Index'].dropna()))
-X = np.concatenate((np.ones(n).reshape(-1,1),np.arange(n).reshape(-1,1)),axis=1)
-X = np.concatenate((X,(np.arange(n)**2).reshape(-1,1)),axis=1)
+X = np.concatenate((np.ones(n).reshape(-1,1)
+                    ,np.arange(n).reshape(-1,1)),
+                   axis=1)
+X = np.concatenate((X,(np.arange(n)**2)
+                    .reshape(-1,1)),
+                   axis=1)
 beta_hat = beta_est(n)
 y_pred = np.matmul(X,beta_hat)
 y = np.log(other_df['IP Index'].dropna())
-plot_df = np.concatenate((np.arange(n).reshape(-1,1),y.values.reshape(-1,1),y_pred),axis=1)
+plot_df = np.concatenate((np.arange(n)
+                          .reshape(-1,1),
+                          y.values.reshape(-1,1),
+                          y_pred),
+                         axis=1)
 plot_df = pd.DataFrame(plot_df)
 plot_df.columns = ['obs','log(IP)','predicted log(IP)']
 plt.plot('obs','log(IP)',data=plot_df)
@@ -1576,7 +1600,7 @@ plt.legend()
 
 
 
-    <matplotlib.legend.Legend at 0x113748da0>
+    <matplotlib.legend.Legend at 0x11445fa20>
 
 
 
@@ -1590,7 +1614,8 @@ However, the research estimates $\widehat{\beta}$ from data available up to each
 ```python
 def output_gap_computer(obs):
     """
-    computes the deviation of the log of industrial production from a quadratic trend.
+    computes the deviation of the log of industrial 
+    production from a quadratic trend.
     """
     return y[obs]-np.dot(X[:obs],beta_est(obs))[-1]
 ```
@@ -1612,7 +1637,9 @@ output_gap =[*pool.map(output_gap_computer, range(1, n+1))]
 
 
 ```python
-df['output_gap']=np.concatenate(([np.nan],np.array(output_gap).reshape(-1)))
+df['output_gap']=np.concatenate(([np.nan],
+                                 np.array(output_gap)
+                                 .reshape(-1)))
 ```
 
 
@@ -1820,7 +1847,8 @@ df[['Dates','y_bond']].head()
 
 
 ```python
-df['r_bond'] = compound_return(df_bonds['Cumulative Return %'].shift(-1))
+df['r_bond'] = (compound_return(
+                    df_bonds['Cumulative Return %'].shift(-1)))
 df[['Dates','r_bond']].head()
 ```
 
@@ -1972,7 +2000,8 @@ df[['Dates','y_bill']].head()
 
 
 ```python
-df['r_bill'] = compound_return(df_bill['Cumulative Return %'].shift(-1))
+df['r_bill'] = compound_return(\
+                    df_bill['Cumulative Return %'].shift(-1))
 plt.plot(df['r_bill'])
 df[['Dates','r_bill']].head()
 ```
@@ -2282,7 +2311,8 @@ def PC_approx_error(X,dim):
     approx_A =  np.matmul(np.matmul(V[:,:dim],
                             np.diag(eig[:dim])),
                             V[:,:dim].transpose())
-    error = np.linalg.norm(approx_A - np.matmul(X.transpose(),X), ord='fro')
+    error = np.linalg.norm(approx_A - np.matmul(\
+                                X.transpose(),X), ord='fro')
     return error
 ```
 
@@ -2292,10 +2322,14 @@ def PC_fit(X,r,dim):
     """
     estimates SPX Index return in a way that minimizes l2 norm
     """
-    X = np.concatenate((np.ones(X.shape[0]).reshape(-1,1),X),axis=1)
+    X = np.concatenate((np.ones(X.shape[0])
+                        .reshape(-1,1),
+                        X),
+                       axis=1)
     beta = \
     np.matmul(
-        np.linalg.inv(1e-6*np.eye(dim+1) + np.matmul(X.transpose(),X)),
+        np.linalg.inv(\
+            1e-6*np.eye(dim+1) + np.matmul(X.transpose(),X)),
         np.matmul(X.transpose(),r))
     return beta
 ```
@@ -2304,8 +2338,9 @@ def PC_fit(X,r,dim):
 
 
 ```python
-stock_explanatory_variables = ['log_DP','inflation','Term_Spread','Default_Spread',\
-                               'output_gap','MA_1_12','MA_2_12','MOM_9','MOM_12']
+stock_explanatory_variables = \
+            ['log_DP','inflation','Term_Spread','Default_Spread',\
+            'output_gap','MA_1_12','MA_2_12','MOM_9','MOM_12']
 X = processed_df[stock_explanatory_variables].values
 ```
 
@@ -2325,7 +2360,7 @@ plt.legend()
 
 
 
-    <matplotlib.legend.Legend at 0x1159b6ef0>
+    <matplotlib.legend.Legend at 0x11456b3c8>
 
 
 
@@ -2339,12 +2374,15 @@ Following figures compare actual return with estimated return based on PC regres
 
 
 ```python
-for i in range(3,10):
+for i in range(7,10):
     dim = i
     r = processed_df['r_SPX'].values
     X_PCA = truncated_PC(X,dim)
     w = PC_fit(X_PCA,r,dim)
-    X_PCA_intercept = np.concatenate((np.ones(X_PCA.shape[0]).reshape(-1,1),X_PCA),axis=1)
+    X_PCA_intercept = np.concatenate(
+                        (np.ones(X_PCA.shape[0])
+                         .reshape(-1,1),
+                         X_PCA),axis=1)
     r_hat = np.matmul(X_PCA_intercept,w)
     plt.figure(i)
     PC_plot_df2 = pd.DataFrame([])
@@ -2367,22 +2405,6 @@ for i in range(3,10):
 
 
 ![png](output_119_2.png)
-
-
-
-![png](output_119_3.png)
-
-
-
-![png](output_119_4.png)
-
-
-
-![png](output_119_5.png)
-
-
-
-![png](output_119_6.png)
 
 
 ### 3.1.2  $R_{OS}^2$ Computation
@@ -2409,10 +2431,14 @@ X[:200].shape
 def Rsquared_OS(X,r,dim,OS_start):
     """
     computes out-of-sample rsquared.
-    First computes PCA only using explanatory variables without augmenting the data with a constant = 1.
-    For regression result, added a constant to capture the y-intercept. 
-    PCA_fit by default adds the constant column. Therefore, I only add the constant column to obtain
-    one step ahead forecast using the weights obtained by the PCA_fit
+    First computes PCA only using explanatory variables 
+    without augmenting the data with a constant = 1.
+    For regression result, added a constant to capture 
+    the y-intercept. 
+    PCA_fit by default adds the constant column. 
+    Therefore, I only add the constant column to obtain
+    one step ahead forecast using the weights obtained 
+    by the PCA_fit
     """
     numerator = 0
     denominator = 0
@@ -2420,7 +2446,11 @@ def Rsquared_OS(X,r,dim,OS_start):
         X_PCA = truncated_PC(X[:i],dim)
         w = PC_fit(X_PCA,r[:i],dim) 
         X_PCA_OS = truncated_PC(X[:i+1],dim)
-        X_PCA_OS_intercept = np.concatenate((np.ones(X_PCA_OS.shape[0]).reshape(-1,1),X_PCA_OS),axis=1)
+        X_PCA_OS_intercept = np.concatenate(
+            (np.ones(X_PCA_OS.shape[0])
+             .reshape(-1,1),
+             X_PCA_OS),
+            axis=1)
         r_hat = np.matmul(X_PCA_OS_intercept[-1],w)
         numerator += (r[i] - r_hat)**2
         denominator += (r[i]-r[:i].mean())**2
@@ -2455,7 +2485,11 @@ For consistency, I utilized 66 quarterly observations exclusively for fitting th
 
 
 ```python
-processed_df[2:].reset_index().set_index('Dates').resample('3M').agg('last').reset_index()[64:].head()
+(processed_df[2:].reset_index()
+                 .set_index('Dates')
+                 .resample('3M')
+                 .agg('last')
+                 .reset_index()[64:].head())
 ```
 
 
@@ -2595,7 +2629,7 @@ processed_df[2:].reset_index().set_index('Dates').resample('3M').agg('last').res
       <td>0.0</td>
       <td>0.0</td>
       <td>-1.0</td>
-      <td>-1.0</td>
+      <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>-0.008239</td>
@@ -2613,9 +2647,16 @@ processed_df[2:].reset_index().set_index('Dates').resample('3M').agg('last').res
 
 
 ```python
-X_quarter = processed_df[2:].set_index('Dates').resample('3M').agg('last')[stock_explanatory_variables].values
-r_quarter = processed_df[2:].set_index('Dates').resample('3M').agg('last')['r_SPX'].values
-plt.plot([Rsquared_OS(X_quarter,r_quarter,i,66) for i in range(X.shape[1]+1)])
+X_quarter = (processed_df[2:]
+             .set_index('Dates')
+             .resample('3M')
+             .agg('last')[stock_explanatory_variables].values)
+r_quarter = (processed_df[2:]
+             .set_index('Dates')
+             .resample('3M')
+             .agg('last')['r_SPX'].values)
+plt.plot([Rsquared_OS(X_quarter,r_quarter,i,66) 
+          for i in range(X.shape[1]+1)])
 plt.xlabel('Rank of Principle Component Approximation')
 plt.ylabel('Out-of-sample R-squared')
 plt.title('Quarter out-of-sample R-squared')
@@ -2638,7 +2679,11 @@ For consistency, I utilized 33 semi-annually observations exclusively for fittin
 
 
 ```python
-processed_df[2:].reset_index().set_index('Dates').resample('6M').agg('last').reset_index()[32:].head()
+(processed_df[2:].reset_index()
+                 .set_index('Dates')
+                 .resample('6M')
+                 .agg('last')
+                 .reset_index()[32:].head())
 ```
 
 
@@ -2736,7 +2781,7 @@ processed_df[2:].reset_index().set_index('Dates').resample('6M').agg('last').res
       <td>0.0</td>
       <td>0.0</td>
       <td>-1.0</td>
-      <td>-1.0</td>
+      <td>1.0</td>
       <td>0.0</td>
       <td>0.0</td>
       <td>-0.008239</td>
@@ -2796,9 +2841,16 @@ processed_df[2:].reset_index().set_index('Dates').resample('6M').agg('last').res
 
 
 ```python
-X_semi = processed_df[2:].set_index('Dates').resample('6M').agg('last')[stock_explanatory_variables].values
-r_semi = processed_df[2:].set_index('Dates').resample('6M').agg('last')['r_SPX'].values
-plt.plot([Rsquared_OS(X_semi,r_semi,i,33) for i in range(X.shape[1]+1)])
+X_semi = (processed_df[2:]
+          .set_index('Dates')
+          .resample('6M')
+          .agg('last')[stock_explanatory_variables].values)
+r_semi = (processed_df[2:]
+          .set_index('Dates')
+          .resample('6M')
+          .agg('last')['r_SPX'].values)
+plt.plot([Rsquared_OS(X_semi,r_semi,i,33) 
+          for i in range(X.shape[1]+1)])
 plt.xlabel('Rank of Principle Component Approximation')
 plt.ylabel('Out-of-sample R-squared')
 plt.title('Semi-annual out-of-sample R-squared')
@@ -2821,7 +2873,11 @@ For consistency, I utilized 33 semi-annually observations exclusively for fittin
 
 
 ```python
-processed_df.reset_index().set_index('Dates').resample('Y').agg(lambda x: x[-2]).reset_index()[15:].head()
+(processed_df.reset_index()
+ .set_index('Dates')
+ .resample('Y')
+ .agg(lambda x: x[-2])
+ .reset_index()[15:].head())
 ```
 
 
@@ -2940,7 +2996,7 @@ processed_df.reset_index().set_index('Dates').resample('Y').agg(lambda x: x[-2])
       <td>1.0</td>
       <td>1.0</td>
       <td>1.0</td>
-      <td>1.0</td>
+      <td>-1.0</td>
       <td>1.0</td>
       <td>1.0</td>
       <td>-0.077893</td>
@@ -2961,7 +3017,7 @@ processed_df.reset_index().set_index('Dates').resample('Y').agg(lambda x: x[-2])
       <td>1.0</td>
       <td>1.0</td>
       <td>-1.0</td>
-      <td>-1.0</td>
+      <td>1.0</td>
       <td>1.0</td>
       <td>1.0</td>
       <td>-0.001713</td>
@@ -2979,19 +3035,19 @@ processed_df.reset_index().set_index('Dates').resample('Y').agg(lambda x: x[-2])
 
 
 ```python
-X_annual = (processed_df.set_index('Dates').resample('Y')
-            .agg(lambda x: x[-2])[stock_explanatory_variables].values)
-r_annual = (processed_df.set_index('Dates').resample('Y')
+X_annual = (processed_df.set_index('Dates')
+            .resample('Y')
+            .agg(lambda x: x[-2])[stock_explanatory_variables]
+            .values)
+r_annual = (processed_df.set_index('Dates')
+            .resample('Y')
             .agg(lambda x: x[-2])['r_SPX'].values)
-plt.plot([Rsquared_OS(X_annual,r_annual,i,16) for i in range(X.shape[1]+1)])
+plt.plot([Rsquared_OS(X_annual,r_annual,i,16) 
+          for i in range(X.shape[1]+1)])
 plt.xlabel('Rank of Principle Component Approximation')
 plt.ylabel('Out-of-sample R-squared')
 plt.title('Annual out-of-sample R-squared')
 ```
-
-    /Users/gimdong-geon/python3_cooking/lib/python3.7/site-packages/numpy/core/numeric.py:538: ComplexWarning: Casting complex values to real discards the imaginary part
-      return array(a, dtype, copy=False, order=order)
-
 
 
 
@@ -3001,7 +3057,7 @@ plt.title('Annual out-of-sample R-squared')
 
 
 
-![png](output_137_2.png)
+![png](output_137_1.png)
 
 
 ### 3.1.3  Clark and Wald (2007) Test Statistics Computation
@@ -3011,10 +3067,15 @@ plt.title('Annual out-of-sample R-squared')
 def CW_test(X,r,dim,OS_start):
     """
     computes Clark and Wald test statistics.
-    First computes PCA only using explanatory variables without augmenting the data with a constant = 1.
-    For regression result, added a constant to capture the y-intercept. 
-    PCA_fit by default adds the constant column. Therefore, I only add the constant column to obtain
-    one step ahead forecast using the weights obtained by the PCA_fit
+    First computes PCA only using explanatory 
+    variables without augmenting the data with 
+    a constant = 1.
+    For regression result, added a constant to 
+    capture the y-intercept. 
+    PCA_fit by default adds the constant column. 
+    Therefore, I only add the constant column to obtain
+    one step ahead forecast using the weights obtained 
+    by the PCA_fit
 
     """
     denom = len(r) - OS_start
@@ -3023,11 +3084,16 @@ def CW_test(X,r,dim,OS_start):
         X_PCA = truncated_PC(X[:i],dim)
         w = PC_fit(X_PCA,r[:i],dim)
         X_PCA_OS = truncated_PC(X[:i+1],dim)
-        X_PCA_OS_intercept = np.concatenate((np.ones(X_PCA_OS.shape[0]).reshape(-1,1),X_PCA_OS),axis=1)
+        X_PCA_OS_intercept = np.concatenate(
+            (np.ones(X_PCA_OS.shape[0])
+             .reshape(-1,1),X_PCA_OS),axis=1)
         r_hat = np.matmul(X_PCA_OS_intercept[-1],w)
-        num += [(r[i]-r[:i].mean())**2 - (r[i] - r_hat)**2  + (r[:i].mean() - r_hat)**2]
+        num += [(r[i]-r[:i].mean())**2 
+                - (r[i] - r_hat)**2  
+                + (r[:i].mean() - r_hat)**2]
     f_bar = np.array(num).mean()
-    CW = np.sqrt(denom) * f_bar / np.std(np.array(num) - f_bar,ddof=1)
+    CW = np.sqrt(denom) * f_bar / \
+         np.std(np.array(num) - f_bar,ddof=1)
     return CW
 ```
 
@@ -3145,18 +3211,23 @@ i=0
 for item in my_dict.keys():
     plt.figure(i)
     if item == 'month':
-        plt.plot([CW_test(X,r,i,my_dict[item]) for i in range(X.shape[1]+1)])
+        plt.plot([CW_test(X,r,i,my_dict[item]) 
+                  for i in range(X.shape[1]+1)])
         plt.xlabel('Rank of Principle Component Approximation')
         plt.ylabel('CW test statistics')
         plt.title('Bond: Month Clark and Wald Test')
     else:
-        eval(f'plt.plot([CW_test(X_{item},r_{item},i,my_dict[item]) for i in range(X.shape[1]+1)])')
+        ev_str = f'plt.plot([CW_test(X_{item},r_{item},i,my_dict[item])'
+        ev_str += 'for i in range(X.shape[1]+1)])'
+        eval(ev_str)
         plt.xlabel('Rank of Principle Component Approximation')
         plt.ylabel('Bond: CW test statistics')
         if item == 'semi':
-            plt.title('Bond: '+f'{item[0].upper()}{item[1:]}' + '-annual Clark and Wald Test')
+            plt.title('Bond: '+f'{item[0].upper()}{item[1:]}' 
+                      + '-annual Clark and Wald Test')
         else:
-            plt.title('Bond: '+ f'{item[0].upper()}{item[1:]} Clark and Wald Test')
+            plt.title('Bond: '+ 
+                      f'{item[0].upper()}{item[1:]} Clark and Wald Test')
     i+=1
 ```
 
@@ -3189,7 +3260,7 @@ plt.plot( processed_df['r_bill'].values)
 
 
 
-    [<matplotlib.lines.Line2D at 0x116a7f940>]
+    [<matplotlib.lines.Line2D at 0x11599a630>]
 
 
 
@@ -3282,9 +3353,16 @@ r_actual = processed_df[['r_SPX','r_bond','r_bill']].values
 ```python
 r_hat_SPX = []
 for i in range(r_actual.shape[0]):
-    X_stock_PCA = truncated_PC(processed_df[stock_explanatory_variables][:i].values,7)
+    X_stock_PCA = truncated_PC(
+            processed_df[stock_explanatory_variables][:i].values,7)
     w_stock = PC_fit(X_stock_PCA,r_actual[:i,0],7)
-    x_stock_PCA_new = np.concatenate((np.ones(1),truncated_PC(processed_df[stock_explanatory_variables][:i+1].values,7)[-1,:]))
+    x_stock_PCA_new = \
+        np.concatenate(
+            (np.ones(1),
+             truncated_PC(
+                 processed_df
+                 [stock_explanatory_variables][:i+1]
+                 .values,7)[-1,:]))
     r_hat_SPX+=[np.dot(x_stock_PCA_new,w_stock)]
 ```
 
@@ -3301,7 +3379,7 @@ plt.legend()
 
 
 
-    <matplotlib.legend.Legend at 0x1169d3c88>
+    <matplotlib.legend.Legend at 0x115c82f60>
 
 
 
@@ -3313,9 +3391,16 @@ plt.legend()
 ```python
 r_hat_bond = []
 for i in range(r_actual.shape[0]):
-    X_bond_PCA = truncated_PC(processed_df[bonds_explanatory_variables][:i].values,2)
+    X_bond_PCA = truncated_PC(
+        processed_df
+        [bonds_explanatory_variables][:i].values,2)
     w_bond = PC_fit(X_bond_PCA,r_actual[:i,1],2)
-    x_bond_PCA_new = np.concatenate((np.ones(1),truncated_PC(processed_df[bonds_explanatory_variables][:i+1].values,2)[-1,:]))
+    x_bond_PCA_new = \
+      np.concatenate(
+        (np.ones(1),
+         truncated_PC(
+             processed_df
+             [bonds_explanatory_variables][:i+1].values,2)[-1,:]))
     r_hat_bond+=[np.dot(x_bond_PCA_new,w_bond)]
 ```
 
@@ -3332,7 +3417,7 @@ plt.legend()
 
 
 
-    <matplotlib.legend.Legend at 0x1169b6d30>
+    <matplotlib.legend.Legend at 0x115cf75c0>
 
 
 
@@ -3371,7 +3456,7 @@ plt.legend()
 
 
 
-    <matplotlib.legend.Legend at 0x116d11f98>
+    <matplotlib.legend.Legend at 0x115eae710>
 
 
 
@@ -3386,10 +3471,6 @@ r_hat['r_hat_bond'] = pd.Series(r_hat_bond)
 r_hat['r_hat_bill'] = pd.Series(r_hat_bill)
 r_hat = r_hat.astype(float)
 ```
-
-    /Users/gimdong-geon/python3_cooking/lib/python3.7/site-packages/pandas/core/dtypes/cast.py:702: ComplexWarning: Casting complex values to real discards the imaginary part
-      return arr.astype(dtype, copy=True)
-
 
 ## 4.2 EWMA Covariance Estimate
 
@@ -3406,11 +3487,7 @@ r^{stock}_3 -\overline{r}^{stock}&  r^{bond}_2 -\overline{r}^{bond}& r^{bill}_2 
 1 & 0 & 0\\ 
  0&  \lambda^{0.5}& 0\\ 
  0&  0& \lambda
-\end{smallmatrix}\bigr)X =\sqrt{1-\lambda} \begin{pmatrix}
-r^{stock}_0 -\overline{r}^{stock}& r^{bond}_0  -\overline{r}^{bond}& r^{bill}_0 -\overline{r}^{bill}\\ 
-\lambda^{0.5}(r^{stock}_1 -\overline{r}^{stock})&  \lambda^{0.5}(r^{bond}_1 -\overline{r}^{bond})&\lambda^{0.5}( r^{bill}_1 -\overline{r}^{bill})\\ 
-\lambda(r^{stock}_2 -\overline{r}^{stock})&  \lambda(r^{bond}_2 -\overline{r}^{bond})&\lambda( r^{bill}_2 -\overline{r}^{bill})
-\end{pmatrix}= (\tilde{r}^{stock},\tilde{r}^{bond},\tilde{r}^{bill} )
+\end{smallmatrix}\bigr)X = (\tilde{r}^{stock},\tilde{r}^{bond},\tilde{r}^{bill} )
 \\
 $$
 
@@ -3419,12 +3496,9 @@ $$\Rightarrow
  (\tilde{r}^{stock})^T\tilde{r}^{stock}& (\tilde{r}^{stock})^T\tilde{r}^{bond} &(\tilde{r}^{stock})^T\tilde{r}^{bill} \\ 
  (\tilde{r}^{bond})^T\tilde{r}^{stock}&  (\tilde{r}^{bond})^T\tilde{r}^{bond}& (\tilde{r}^{bond})^T\tilde{r}^{bill}\\ 
  (\tilde{r}^{bill})^T\tilde{r}^{stock}&  (\tilde{r}^{bill})^T\tilde{r}^{bond}& (\tilde{r}^{bill})^T\tilde{r}^{bill}
-\end{pmatrix} = \begin{pmatrix}
-Cov(r^{stock},r^{stock}) &  Cov(r^{stock},r^{bond})&Cov(r^{stock},r^{bill}) \\ 
-Cov(r^{bond},r^{stock}) & Cov(r^{bond},r^{ond}) & Cov(r^{bond},r^{bill})\\ 
-Cov(r^{bill},r^{stock}) & Cov(r^{bill},r^{bond}) & Cov(r^{bill},r^{bill})
 \end{pmatrix}
 $$
+which is the desired matrix
 
 
 ```python
@@ -3460,9 +3534,12 @@ I slightly modify the weights `c` because of poor quality of bond/bill returns d
 
 
 ```python
-omega_stock = [(1/0.75 -1)*EWMA(t)[0,0] for t in range(r_actual.shape[0])]
-omega_bond  = [(1/0.5 -1)*EWMA(t)[1,1] for t in range(r_actual.shape[0])]
-omega_bill  = [(1/0.25 -1)*EWMA(t)[2,2] for t in range(r_actual.shape[0])]
+omega_stock = [(1/0.75 -1)*EWMA(t)[0,0] 
+               for t in range(r_actual.shape[0])]
+omega_bond  = [(1/0.5 -1)*EWMA(t)[1,1] 
+               for t in range(r_actual.shape[0])]
+omega_bill  = [(1/0.25 -1)*EWMA(t)[2,2] 
+               for t in range(r_actual.shape[0])]
 ```
 
 
@@ -3489,23 +3566,46 @@ $$ \Sigma_{BL} = \hat{\Sigma} - \hat{\Sigma}(\hat{\Sigma}+\Omega)^{-1}\hat{\Sigm
 mu_BL = []
 Sigma_BL = []
 for i in range(len(r_actual)):
-    mu_BL+=[np.dot(np.matmul(EWMA(i),np.linalg.inv(1e-6 + EWMA(i) + Omega[i])),r_hat.values[i] )]
-    Sigma_BL+=[EWMA(i)-np.matmul(np.matmul(EWMA(i),np.linalg.inv(1e-6 +EWMA(i)+Omega[i])),EWMA(i))]
+    mu_BL+=[np.dot(
+                np.matmul(EWMA(i),
+                    np.linalg.inv(
+                        1e-6 + EWMA(i) + Omega[i])),
+                r_hat.values[i] )]
+    Sigma_BL+=[EWMA(i)
+               -np.matmul(
+                   np.matmul(
+                       EWMA(i),
+                       np.linalg.inv(
+                           1e-6 +EWMA(i)+Omega[i]))
+                   ,EWMA(i))]
 ```
 
 ### 4.3.3 Black-Litterman Return Expectation and Variance
 
 $log(r)|view \sim N(\mu_{BL},\Sigma_{BL}) \\ \Rightarrow E[P^i_{t}] = P^i_{0}exp\left(\mu_{BL,i} + \frac{1}{2} \Sigma_{BL,(i,i)}\right) \quad \text{where} \quad i\in{\{stock,bond,bill\}}
- \\ \quad Cov[P^i_{t},P^j_{t}] =P^i_{0}P^i_{0}exp\left(\mu_{BL,i}+\mu_{BL,j}\right)exp\left(\frac{1}{2}\left(\Sigma_{BL,(ii)} +   \Sigma_{BL,(jj)}\right)\right)\bigodot\left(exp\left(\Sigma_{BL,(ij)}-1\right)\right) \quad \text{where}  \quad  i,j\in{\{stock,bond,bill\}}        $
+ \\ \quad Cov[P^i_{t},P^j_{t}] =P^i_{0}P^i_{0}e^{\mu_{BL,i}+\mu_{BL,j}}e^{\frac{1}{2}\left(\Sigma_{BL,(ii)} +   \Sigma_{BL,(jj)}\right)}\bigodot\left(e^{\Sigma_{BL,(ij)}-1}\right)       $
+
 
 
 ```python
 m=[]
 S=[]
 for i in range(len(r_actual)):
-    m += [np.exp(mu_BL[i]+0.5*np.diag(Sigma_BL[i])).reshape(-1,1)  - 1]
-    S += [np.multiply(np.matmul(np.exp(mu_BL[i]+0.5*np.diag(Sigma_BL[i])).reshape(-1,1),
-          np.exp(mu_BL[i]+0.5*np.diag(Sigma_BL[i])).reshape(-1,1).T),np.exp(Sigma_BL[i]) - 1)]
+    m += [np.exp(mu_BL[i]
+          +0.5*np.diag(Sigma_BL[i]))
+                  .reshape(-1,1)
+          - 1]
+    S += [np.multiply(
+            np.matmul(
+                np.exp(
+                    mu_BL[i]
+                    +0.5*np.diag(Sigma_BL[i]))
+                     .reshape(-1,1),
+                np.exp(
+                    mu_BL[i]
+                    +0.5*np.diag(Sigma_BL[i]))
+                     .reshape(-1,1).T)
+            ,np.exp(Sigma_BL[i]) - 1)]
 ```
 
 ### 4.3.4 DAA Portfolio Optimization
@@ -3529,8 +3629,10 @@ where $R$ is the Cholesky Decomposition of $S$
 ```python
 def cholesky(A):
     """
-    computes left cholesky matrix. Advantage of this matrix over np.linalg.cholesky
-    is that first few observation of S matrix is not positive definite which creates
+    computes left cholesky matrix. Advantage of this 
+    matrix over np.linalg.cholesky
+    is that first few observation of S matrix is not 
+    positive definite which creates
     an error message.
     """
     L = np.eye(3)
@@ -3538,7 +3640,8 @@ def cholesky(A):
     tmp = np.matmul(L,A)
     L2 = np.eye(3)
     L2[2,1] = -tmp[2,1]/tmp[1,1]
-    diag = np.sqrt(np.matmul(np.matmul(np.matmul(L2,tmp),L.T),L2.T))
+    diag = np.sqrt(np.matmul(
+                    np.matmul(np.matmul(L2,tmp),L.T),L2.T))
     Linv=np.eye(3)
     Linv[1:,0] = -L[1:,0]/L[0,0]
     L2inv=np.eye(3)
@@ -3579,16 +3682,16 @@ for i in range(len(r_actual))[:5]:
     [[ 0.00785924  0.          0.        ]
      [-0.000789    0.00282752  0.        ]
      [ 0.00037972  0.00165482  0.00759579]]
-    [[ 0.00707922  0.          0.        ]
-     [-0.00119289  0.0043134   0.        ]
-     [ 0.00031536  0.00185641  0.00908291]]
-    [[ 9.99118761e-03  0.00000000e+00  0.00000000e+00]
-     [-1.14962585e-03  5.56672793e-03  0.00000000e+00]
-     [ 2.54922379e-05  4.17563252e-03  7.35078286e-03]]
+    [[ 0.00665097  0.          0.        ]
+     [-0.00130537  0.00472013  0.        ]
+     [ 0.00032736  0.00192706  0.00942859]]
+    [[ 1.00566426e-02  0.00000000e+00  0.00000000e+00]
+     [-1.12037556e-03  5.42509194e-03  0.00000000e+00]
+     [ 2.50722230e-05  4.10683401e-03  7.22966998e-03]]
 
 
-    /Users/gimdong-geon/python3_cooking/lib/python3.7/site-packages/ipykernel_launcher.py:12: RuntimeWarning: invalid value encountered in sqrt
-      if sys.path[0] == '':
+    /Users/gimdong-geon/python3_cooking/lib/python3.7/site-packages/ipykernel_launcher.py:15: RuntimeWarning: invalid value encountered in sqrt
+      from ipykernel import kernelapp as app
 
 
 S is not psd for many observations. So I avoided cholesky
@@ -3604,7 +3707,8 @@ To get constraints, I use fstring with list comprehension as below:
 
 
 ```python
-cone = '+'.join([f'((w{i}-w_bench[{i}])*S[i][{i},{j}]*(w{j}-w_bench[{j}]))' for i in range(3) for j in range(3)])
+cone = '+'.join([f'((w{i}-w_bench[{i}])*S[i][{i},{j}]*(w{j}-w_bench[{j}]))'\
+                 for i in range(3) for j in range(3)])
 cone
 ```
 
@@ -3649,7 +3753,8 @@ for i in range(len(r_actual)):
             for v in model.getVars():
                 print('%s %g' % (v.varName, v.x))
             print('Obj: %g' % obj.getValue())
-        w = np.concatenate((w,np.array([model.getVars()[i].x for i in range(3)]).reshape(-1,3)))
+        w = np.concatenate((w,np.array([model.getVars()[i].x 
+                                for i in range(3)]).reshape(-1,3)))
 w = w[1:,:]
 ```
 
@@ -3659,20 +3764,20 @@ w = w[1:,:]
     w2 0.899978
     Obj: 0.00750459
     100th observation: 
-    w0 0.817374
-    w1 0.132397
-    w2 0.050229
-    Obj: 0.0055681
+    w0 0.818077
+    w1 0.131605
+    w2 0.0503178
+    Obj: 0.00521456
     200th observation: 
-    w0 0.818005
-    w1 0.131857
-    w2 0.0501372
-    Obj: 0.00629528
+    w0 0.818
+    w1 0.131969
+    w2 0.0500305
+    Obj: 0.00632291
     300th observation: 
-    w0 0.70951
-    w1 0.126051
-    w2 0.164439
-    Obj: 0.0125932
+    w0 0.700523
+    w1 0.131539
+    w2 0.167938
+    Obj: 0.0127552
 
 
 
@@ -3741,9 +3846,9 @@ w[np.abs(r_actual[:,2])>5]
 
 
 
-    array([[0.48110419, 0.46817669, 0.        ],
-           [0.60319534, 0.21560353, 0.        ],
-           [0.57516302, 0.24964986, 0.        ]])
+    array([[0.48131974, 0.46832747, 0.        ],
+           [0.61944123, 0.19848686, 0.        ],
+           [0.56876547, 0.25783333, 0.        ]])
 
 
 
@@ -3755,14 +3860,16 @@ r_portfolio_bench = np.multiply(r_actual,w_bench).sum(axis=1)
 
 
 ```python
-DAA_geo_return = (((r_portfolio_actual[200:]+1).prod()**(1/r_portfolio_actual[200:].shape[0]))-1) * 12
+DAA_geo_return = ((((r_portfolio_actual[200:]+1)
+                   .prod()**(1/r_portfolio_actual[200:].shape[0]))
+                  -1) * 12)
 DAA_geo_return
 ```
 
 
 
 
-    0.13076375431897436
+    0.12859850020765418
 
 
 
@@ -3792,7 +3899,7 @@ DAA_std
 
 
 
-    0.0952343518306201
+    0.09470120187816364
 
 
 
@@ -3813,20 +3920,22 @@ Bench_std
 
 
 ```python
-DAA_mdd = -((r_portfolio_actual[200:] + 1).cumprod().min() - 1)
+DAA_mdd = -((r_portfolio_actual[200:] + 1)
+            .cumprod().min() - 1)
 DAA_mdd
 ```
 
 
 
 
-    0.5258912498691841
+    0.5218382528879826
 
 
 
 
 ```python
-Bench_mdd = -((r_portfolio_bench[200:] + 1).cumprod().min() - 1)
+Bench_mdd = -((r_portfolio_bench[200:] + 1)
+              .cumprod().min() - 1)
 Bench_mdd
 ```
 
@@ -3848,7 +3957,7 @@ DAA_Calmar
 
 
 
-    0.24865170194693664
+    0.2464336401096664
 
 
 
@@ -3876,7 +3985,7 @@ Avg_Excess_Return
 
 
 
-    0.04826880200681316
+    0.04610354789549298
 
 
 
@@ -3884,14 +3993,16 @@ Avg_Excess_Return
 
 
 ```python
-Tracking_Error = (r_portfolio_actual[200:] - r_portfolio_bench[200:]).std(ddof=1) *np.sqrt(12)
+Tracking_Error = ((r_portfolio_actual[200:] 
+                  - r_portfolio_bench[200:])
+                 .std(ddof=1) *np.sqrt(12))
 Tracking_Error
 ```
 
 
 
 
-    0.3114030108919141
+    0.3100078946188472
 
 
 
@@ -3906,7 +4017,44 @@ IR
 
 
 
-    0.1550042880721116
+    0.14871733493167008
+
+
+
+### 4.3.5.7 CER Gain
+
+Certainty Equivalent Return is the return an investor would want to be guaranteed for his investment. The investor is assumed to have power utility with risk aversion coefficients of two. This means the investor is risk-averse because utility function is concave.
+Power Utility fuction is as following:
+$$U(x) = \frac{x^{1-RAA}}{1-RAA}$$
+To compute the CER, for each return observation, compute $U(1+return)$. Denote the average of the return as $\overline{U}$
+Then, we recover CER from the following equation.
+$$ \overline{U} = \frac{\left(1 + CER\right)^{1-RAA}}{1-RAA}$$
+For the ease of writing code, this is equivalent to:
+$$ CER = [\left(1-RRA \right)\overline{U} ]^{\frac{1}{1-RAA}} -1 $$
+As the final step, the return is annualized.
+
+
+```python
+U_bar_actual = (-(1+r_portfolio_actual)**(-1)).mean()
+U_bar_bench = (-(1+r_portfolio_bench)**(-1)).mean()
+```
+
+
+```python
+CER_actual = ((-U_bar_actual)**(-1) -1)*12
+CER_bench = ((-U_bar_bench)**(-1) -1)*12
+```
+
+
+```python
+CER_gain = CER_actual - CER_bench
+CER_gain
+```
+
+
+
+
+    0.016350129132626456
 
 
 
@@ -4176,7 +4324,8 @@ r_sign_bench = np.sign(r_portfolio_bench)
 transaction_benchmark_df = processed_df[['Dates']]
 transaction_benchmark_df['tc_0_bp'] = r_portfolio_bench 
 for i in range(1,len(transaction_cost)):
-    string = f'transaction_benchmark_df["tc_{i*50}_bp"] = np.multiply(r_portfolio_bench,'
+    string = f'transaction_benchmark_df["tc_{i*50}_bp"]'
+    string += '=np.multiply(r_portfolio_bench,'
     string += '(1-r_sign_bench*transaction_cost[i]))'
     exec(string)
 transaction_benchmark_df.set_index('Dates', inplace=True)
@@ -4403,7 +4552,8 @@ transaction_benchmark_df.head()
 
 
 ```python
-tc_perf_df = pd.DataFrame([f'{i*50} bp' for i in range(0,len(transaction_cost))])
+tc_perf_df = pd.DataFrame([f'{i*50} bp' 
+                           for i in range(0,len(transaction_cost))])
 tc_perf_df.columns=['transaction_cost']
 ```
 
@@ -4412,11 +4562,15 @@ tc_perf_df.columns=['transaction_cost']
 tc_return = []
 tc_bench_return = []
 for i in range(0,len(transaction_cost)):
-    string = f"tc_return += [(((transaction_df['tc_{i*50}_bp'].values[200:]+1)"
-    string += f'.prod()**(1/transaction_df["tc_{i*50}_bp"].values[200:].shape[0]))-1) * 12]'
+    string = f"tc_return += [(((transaction_df"
+    string += f"['tc_{i*50}_bp'].values[200:]+1)"
+    string += f'.prod()**(1/transaction_df["tc_'
+    string += f'{i*50}_bp"].values[200:].shape[0]))-1) * 12]'
     exec(string)
-    string2 = f"tc_bench_return += [(((transaction_benchmark_df['tc_{i*50}_bp'].values[200:]+1)"
-    string2 += f'.prod()**(1/transaction_benchmark_df["tc_{i*50}_bp"].values[200:].shape[0]))-1) * 12]'
+    string2 = f"tc_bench_return += [(((transaction_"
+    string2 += f"benchmark_df['tc_{i*50}_bp'].values[200:]+1)"
+    string2 += f'.prod()**(1/transaction_benchmark_df'
+    string2 += f'["tc_{i*50}_bp"].values[200:].shape[0]))-1) * 12]'
     exec(string2)
 ```
 
@@ -4461,31 +4615,31 @@ tc_perf_df.head()
     <tr>
       <th>0</th>
       <td>0 bp</td>
-      <td>0.130764</td>
+      <td>0.128599</td>
       <td>0.082495</td>
     </tr>
     <tr>
       <th>1</th>
       <td>50 bp</td>
-      <td>0.130371</td>
+      <td>0.128205</td>
       <td>0.082196</td>
     </tr>
     <tr>
       <th>2</th>
       <td>100 bp</td>
-      <td>0.129977</td>
+      <td>0.127812</td>
       <td>0.081897</td>
     </tr>
     <tr>
       <th>3</th>
       <td>150 bp</td>
-      <td>0.129584</td>
+      <td>0.127419</td>
       <td>0.081598</td>
     </tr>
     <tr>
       <th>4</th>
       <td>200 bp</td>
-      <td>0.129191</td>
+      <td>0.127025</td>
       <td>0.081300</td>
     </tr>
   </tbody>
@@ -4498,19 +4652,21 @@ tc_perf_df.head()
 
 
 ```python
-tc_perf_df['std'] = [eval(f'transaction_df["tc_{i*50}_bp"].values[200:].std(ddof=1)')
-                                    for i in range(0,len(transaction_cost))]
+aug_str = '.values[200:].std(ddof=1)'
+tc_perf_df['std'] = [eval(f'transaction_df["tc_{i*50}_bp"]'+aug_str)
+                            for i in range(0,len(transaction_cost))]
 ```
 
 
 ```python
-tc_perf_df['std_bench'] = [eval(f'transaction_benchmark_df["tc_{i*50}_bp"].values[200:].std(ddof=1)')
-                                    for i in range(0,len(transaction_cost))]
+tc_perf_df['std_bench'] = \
+[eval(f'transaction_benchmark_df["tc_{i*50}_bp"]'+aug_str)
+      for i in range(0,len(transaction_cost))]
 ```
 
 
 ```python
-tc_perf_df.head()
+tc_perf_df[['transaction_cost','std_bench']].head()
 ```
 
 
@@ -4535,9 +4691,6 @@ tc_perf_df.head()
     <tr style="text-align: right;">
       <th></th>
       <th>transaction_cost</th>
-      <th>annual_return</th>
-      <th>annual_return_bench</th>
-      <th>std</th>
       <th>std_bench</th>
     </tr>
   </thead>
@@ -4545,41 +4698,26 @@ tc_perf_df.head()
     <tr>
       <th>0</th>
       <td>0 bp</td>
-      <td>0.130764</td>
-      <td>0.082495</td>
-      <td>0.095234</td>
       <td>0.077234</td>
     </tr>
     <tr>
       <th>1</th>
       <td>50 bp</td>
-      <td>0.130371</td>
-      <td>0.082196</td>
-      <td>0.095222</td>
       <td>0.077230</td>
     </tr>
     <tr>
       <th>2</th>
       <td>100 bp</td>
-      <td>0.129977</td>
-      <td>0.081897</td>
-      <td>0.095209</td>
       <td>0.077226</td>
     </tr>
     <tr>
       <th>3</th>
       <td>150 bp</td>
-      <td>0.129584</td>
-      <td>0.081598</td>
-      <td>0.095196</td>
       <td>0.077221</td>
     </tr>
     <tr>
       <th>4</th>
       <td>200 bp</td>
-      <td>0.129191</td>
-      <td>0.081300</td>
-      <td>0.095184</td>
       <td>0.077217</td>
     </tr>
   </tbody>
@@ -4592,19 +4730,23 @@ tc_perf_df.head()
 
 
 ```python
-tc_perf_df['max_drawdown'] = [eval(f'(transaction_df["tc_{i*50}_bp"].values[200:]+1).cumprod().min()')
-                                    for i in range(0,len(transaction_cost))]
+aug_str = '.values[200:]+1).cumprod().min()'
+tc_perf_df['max_drawdown'] = \
+[eval(f'(transaction_df["tc_{i*50}_bp"]'+aug_str)
+      for i in range(0,len(transaction_cost))]
 ```
 
 
 ```python
-tc_perf_df['max_drawdown_bench'] = [eval(f'(transaction_benchmark_df["tc_{i*50}_bp"].values[200:]+1).cumprod().min()')
-                                    for i in range(0,len(transaction_cost))]
+tc_perf_df['max_drawdown_bench'] = \
+[eval(f'(transaction_benchmark_df["tc_{i*50}_bp"]'+aug_str)
+      for i in range(0,len(transaction_cost))]
 ```
 
 
 ```python
-tc_perf_df.head()
+tc_perf_df[['transaction_cost','max_drawdown',\
+            'max_drawdown_bench']].head()
 ```
 
 
@@ -4629,10 +4771,6 @@ tc_perf_df.head()
     <tr style="text-align: right;">
       <th></th>
       <th>transaction_cost</th>
-      <th>annual_return</th>
-      <th>annual_return_bench</th>
-      <th>std</th>
-      <th>std_bench</th>
       <th>max_drawdown</th>
       <th>max_drawdown_bench</th>
     </tr>
@@ -4641,51 +4779,31 @@ tc_perf_df.head()
     <tr>
       <th>0</th>
       <td>0 bp</td>
-      <td>0.130764</td>
-      <td>0.082495</td>
-      <td>0.095234</td>
-      <td>0.077234</td>
-      <td>0.474109</td>
+      <td>0.478162</td>
       <td>0.585375</td>
     </tr>
     <tr>
       <th>1</th>
       <td>50 bp</td>
-      <td>0.130371</td>
-      <td>0.082196</td>
-      <td>0.095222</td>
-      <td>0.077230</td>
-      <td>0.473852</td>
+      <td>0.477906</td>
       <td>0.585139</td>
     </tr>
     <tr>
       <th>2</th>
       <td>100 bp</td>
-      <td>0.129977</td>
-      <td>0.081897</td>
-      <td>0.095209</td>
-      <td>0.077226</td>
-      <td>0.473596</td>
+      <td>0.477650</td>
       <td>0.584904</td>
     </tr>
     <tr>
       <th>3</th>
       <td>150 bp</td>
-      <td>0.129584</td>
-      <td>0.081598</td>
-      <td>0.095196</td>
-      <td>0.077221</td>
-      <td>0.473339</td>
+      <td>0.477394</td>
       <td>0.584668</td>
     </tr>
     <tr>
       <th>4</th>
       <td>200 bp</td>
-      <td>0.129191</td>
-      <td>0.081300</td>
-      <td>0.095184</td>
-      <td>0.077217</td>
-      <td>0.473083</td>
+      <td>0.477139</td>
       <td>0.584433</td>
     </tr>
   </tbody>
@@ -4698,17 +4816,21 @@ tc_perf_df.head()
 
 
 ```python
-tc_perf_df['calmar'] = tc_perf_df['annual_return'].values/tc_perf_df['max_drawdown'].values
+tc_perf_df['calmar'] =\
+    tc_perf_df['annual_return'].values/ \
+    tc_perf_df['max_drawdown'].values
 ```
 
 
 ```python
-tc_perf_df['calmar_bench'] = tc_perf_df['annual_return_bench'].values/tc_perf_df['max_drawdown_bench'].values
+tc_perf_df['calmar_bench'] = \
+    tc_perf_df['annual_return_bench'].values/ \
+    tc_perf_df['max_drawdown_bench'].values
 ```
 
 
 ```python
-tc_perf_df.head()
+tc_perf_df[['transaction_cost','calmar','calmar_bench']].head()
 ```
 
 
@@ -4733,12 +4855,6 @@ tc_perf_df.head()
     <tr style="text-align: right;">
       <th></th>
       <th>transaction_cost</th>
-      <th>annual_return</th>
-      <th>annual_return_bench</th>
-      <th>std</th>
-      <th>std_bench</th>
-      <th>max_drawdown</th>
-      <th>max_drawdown_bench</th>
       <th>calmar</th>
       <th>calmar_bench</th>
     </tr>
@@ -4747,61 +4863,31 @@ tc_perf_df.head()
     <tr>
       <th>0</th>
       <td>0 bp</td>
-      <td>0.130764</td>
-      <td>0.082495</td>
-      <td>0.095234</td>
-      <td>0.077234</td>
-      <td>0.474109</td>
-      <td>0.585375</td>
-      <td>0.275810</td>
+      <td>0.268944</td>
       <td>0.140927</td>
     </tr>
     <tr>
       <th>1</th>
       <td>50 bp</td>
-      <td>0.130371</td>
-      <td>0.082196</td>
-      <td>0.095222</td>
-      <td>0.077230</td>
-      <td>0.473852</td>
-      <td>0.585139</td>
-      <td>0.275129</td>
+      <td>0.268265</td>
       <td>0.140473</td>
     </tr>
     <tr>
       <th>2</th>
       <td>100 bp</td>
-      <td>0.129977</td>
-      <td>0.081897</td>
-      <td>0.095209</td>
-      <td>0.077226</td>
-      <td>0.473596</td>
-      <td>0.584904</td>
-      <td>0.274448</td>
+      <td>0.267585</td>
       <td>0.140018</td>
     </tr>
     <tr>
       <th>3</th>
       <td>150 bp</td>
-      <td>0.129584</td>
-      <td>0.081598</td>
-      <td>0.095196</td>
-      <td>0.077221</td>
-      <td>0.473339</td>
-      <td>0.584668</td>
-      <td>0.273766</td>
+      <td>0.266904</td>
       <td>0.139564</td>
     </tr>
     <tr>
       <th>4</th>
       <td>200 bp</td>
-      <td>0.129191</td>
-      <td>0.081300</td>
-      <td>0.095184</td>
-      <td>0.077217</td>
-      <td>0.473083</td>
-      <td>0.584433</td>
-      <td>0.273083</td>
+      <td>0.266223</td>
       <td>0.139108</td>
     </tr>
   </tbody>
@@ -4814,12 +4900,13 @@ tc_perf_df.head()
 
 
 ```python
-tc_perf_df['avg_excess_return'] = tc_perf_df['annual_return'] - tc_perf_df['annual_return_bench']
+tc_perf_df['avg_excess_return'] =\
+tc_perf_df['annual_return'] - tc_perf_df['annual_return_bench']
 ```
 
 
 ```python
-tc_perf_df.head()
+tc_perf_df[['transaction_cost','avg_excess_return']].head()
 ```
 
 
@@ -4844,14 +4931,6 @@ tc_perf_df.head()
     <tr style="text-align: right;">
       <th></th>
       <th>transaction_cost</th>
-      <th>annual_return</th>
-      <th>annual_return_bench</th>
-      <th>std</th>
-      <th>std_bench</th>
-      <th>max_drawdown</th>
-      <th>max_drawdown_bench</th>
-      <th>calmar</th>
-      <th>calmar_bench</th>
       <th>avg_excess_return</th>
     </tr>
   </thead>
@@ -4859,67 +4938,27 @@ tc_perf_df.head()
     <tr>
       <th>0</th>
       <td>0 bp</td>
-      <td>0.130764</td>
-      <td>0.082495</td>
-      <td>0.095234</td>
-      <td>0.077234</td>
-      <td>0.474109</td>
-      <td>0.585375</td>
-      <td>0.275810</td>
-      <td>0.140927</td>
-      <td>0.048269</td>
+      <td>0.046104</td>
     </tr>
     <tr>
       <th>1</th>
       <td>50 bp</td>
-      <td>0.130371</td>
-      <td>0.082196</td>
-      <td>0.095222</td>
-      <td>0.077230</td>
-      <td>0.473852</td>
-      <td>0.585139</td>
-      <td>0.275129</td>
-      <td>0.140473</td>
-      <td>0.048174</td>
+      <td>0.046009</td>
     </tr>
     <tr>
       <th>2</th>
       <td>100 bp</td>
-      <td>0.129977</td>
-      <td>0.081897</td>
-      <td>0.095209</td>
-      <td>0.077226</td>
-      <td>0.473596</td>
-      <td>0.584904</td>
-      <td>0.274448</td>
-      <td>0.140018</td>
-      <td>0.048080</td>
+      <td>0.045915</td>
     </tr>
     <tr>
       <th>3</th>
       <td>150 bp</td>
-      <td>0.129584</td>
-      <td>0.081598</td>
-      <td>0.095196</td>
-      <td>0.077221</td>
-      <td>0.473339</td>
-      <td>0.584668</td>
-      <td>0.273766</td>
-      <td>0.139564</td>
-      <td>0.047986</td>
+      <td>0.045820</td>
     </tr>
     <tr>
       <th>4</th>
       <td>200 bp</td>
-      <td>0.129191</td>
-      <td>0.081300</td>
-      <td>0.095184</td>
-      <td>0.077217</td>
-      <td>0.473083</td>
-      <td>0.584433</td>
-      <td>0.273083</td>
-      <td>0.139108</td>
-      <td>0.047891</td>
+      <td>0.045726</td>
     </tr>
   </tbody>
 </table>
@@ -4932,13 +4971,15 @@ tc_perf_df.head()
 
 ```python
 string = f'(transaction_df["tc_{i*50}_bp"].values[200:] '
-string += f'- transaction_benchmark_df["tc_{i*50}_bp"].values[200:]).std(ddof=1)*np.sqrt(12)'
-tc_perf_df['tracking_error'] = [eval(string) for i in range(0,len(transaction_cost))]
+string += f'- transaction_benchmark_df["tc_{i*50}_bp"]'
+string += '.values[200:]).std(ddof=1)*np.sqrt(12)'
+tc_perf_df['tracking_error'] = \
+[eval(string) for i in range(0,len(transaction_cost))]
 ```
 
 
 ```python
-tc_perf_df.head()
+tc_perf_df[['transaction_cost','tracking_error']].head()
 ```
 
 
@@ -4963,15 +5004,6 @@ tc_perf_df.head()
     <tr style="text-align: right;">
       <th></th>
       <th>transaction_cost</th>
-      <th>annual_return</th>
-      <th>annual_return_bench</th>
-      <th>std</th>
-      <th>std_bench</th>
-      <th>max_drawdown</th>
-      <th>max_drawdown_bench</th>
-      <th>calmar</th>
-      <th>calmar_bench</th>
-      <th>avg_excess_return</th>
       <th>tracking_error</th>
     </tr>
   </thead>
@@ -4979,72 +5011,27 @@ tc_perf_df.head()
     <tr>
       <th>0</th>
       <td>0 bp</td>
-      <td>0.130764</td>
-      <td>0.082495</td>
-      <td>0.095234</td>
-      <td>0.077234</td>
-      <td>0.474109</td>
-      <td>0.585375</td>
-      <td>0.275810</td>
-      <td>0.140927</td>
-      <td>0.048269</td>
-      <td>0.306196</td>
+      <td>0.30494</td>
     </tr>
     <tr>
       <th>1</th>
       <td>50 bp</td>
-      <td>0.130371</td>
-      <td>0.082196</td>
-      <td>0.095222</td>
-      <td>0.077230</td>
-      <td>0.473852</td>
-      <td>0.585139</td>
-      <td>0.275129</td>
-      <td>0.140473</td>
-      <td>0.048174</td>
-      <td>0.306196</td>
+      <td>0.30494</td>
     </tr>
     <tr>
       <th>2</th>
       <td>100 bp</td>
-      <td>0.129977</td>
-      <td>0.081897</td>
-      <td>0.095209</td>
-      <td>0.077226</td>
-      <td>0.473596</td>
-      <td>0.584904</td>
-      <td>0.274448</td>
-      <td>0.140018</td>
-      <td>0.048080</td>
-      <td>0.306196</td>
+      <td>0.30494</td>
     </tr>
     <tr>
       <th>3</th>
       <td>150 bp</td>
-      <td>0.129584</td>
-      <td>0.081598</td>
-      <td>0.095196</td>
-      <td>0.077221</td>
-      <td>0.473339</td>
-      <td>0.584668</td>
-      <td>0.273766</td>
-      <td>0.139564</td>
-      <td>0.047986</td>
-      <td>0.306196</td>
+      <td>0.30494</td>
     </tr>
     <tr>
       <th>4</th>
       <td>200 bp</td>
-      <td>0.129191</td>
-      <td>0.081300</td>
-      <td>0.095184</td>
-      <td>0.077217</td>
-      <td>0.473083</td>
-      <td>0.584433</td>
-      <td>0.273083</td>
-      <td>0.139108</td>
-      <td>0.047891</td>
-      <td>0.306196</td>
+      <td>0.30494</td>
     </tr>
   </tbody>
 </table>
@@ -5052,16 +5039,18 @@ tc_perf_df.head()
 
 
 
-### 4.3.2.7 Information Ratio
+### 4.4.2.7 Information Ratio
 
 
 ```python
-tc_perf_df['IR'] = tc_perf_df['avg_excess_return'].values/tc_perf_df['tracking_error'].values
+tc_perf_df['IR'] = \
+    tc_perf_df['avg_excess_return'].values/ \
+    tc_perf_df['tracking_error'].values
 ```
 
 
 ```python
-tc_perf_df.head()
+tc_perf_df[['transaction_cost','IR']].head()
 ```
 
 
@@ -5086,16 +5075,6 @@ tc_perf_df.head()
     <tr style="text-align: right;">
       <th></th>
       <th>transaction_cost</th>
-      <th>annual_return</th>
-      <th>annual_return_bench</th>
-      <th>std</th>
-      <th>std_bench</th>
-      <th>max_drawdown</th>
-      <th>max_drawdown_bench</th>
-      <th>calmar</th>
-      <th>calmar_bench</th>
-      <th>avg_excess_return</th>
-      <th>tracking_error</th>
       <th>IR</th>
     </tr>
   </thead>
@@ -5103,83 +5082,51 @@ tc_perf_df.head()
     <tr>
       <th>0</th>
       <td>0 bp</td>
-      <td>0.130764</td>
-      <td>0.082495</td>
-      <td>0.095234</td>
-      <td>0.077234</td>
-      <td>0.474109</td>
-      <td>0.585375</td>
-      <td>0.275810</td>
-      <td>0.140927</td>
-      <td>0.048269</td>
-      <td>0.306196</td>
-      <td>0.157640</td>
+      <td>0.151189</td>
     </tr>
     <tr>
       <th>1</th>
       <td>50 bp</td>
-      <td>0.130371</td>
-      <td>0.082196</td>
-      <td>0.095222</td>
-      <td>0.077230</td>
-      <td>0.473852</td>
-      <td>0.585139</td>
-      <td>0.275129</td>
-      <td>0.140473</td>
-      <td>0.048174</td>
-      <td>0.306196</td>
-      <td>0.157332</td>
+      <td>0.150879</td>
     </tr>
     <tr>
       <th>2</th>
       <td>100 bp</td>
-      <td>0.129977</td>
-      <td>0.081897</td>
-      <td>0.095209</td>
-      <td>0.077226</td>
-      <td>0.473596</td>
-      <td>0.584904</td>
-      <td>0.274448</td>
-      <td>0.140018</td>
-      <td>0.048080</td>
-      <td>0.306196</td>
-      <td>0.157024</td>
+      <td>0.150569</td>
     </tr>
     <tr>
       <th>3</th>
       <td>150 bp</td>
-      <td>0.129584</td>
-      <td>0.081598</td>
-      <td>0.095196</td>
-      <td>0.077221</td>
-      <td>0.473339</td>
-      <td>0.584668</td>
-      <td>0.273766</td>
-      <td>0.139564</td>
-      <td>0.047986</td>
-      <td>0.306196</td>
-      <td>0.156716</td>
+      <td>0.150260</td>
     </tr>
     <tr>
       <th>4</th>
       <td>200 bp</td>
-      <td>0.129191</td>
-      <td>0.081300</td>
-      <td>0.095184</td>
-      <td>0.077217</td>
-      <td>0.473083</td>
-      <td>0.584433</td>
-      <td>0.273083</td>
-      <td>0.139108</td>
-      <td>0.047891</td>
-      <td>0.306196</td>
-      <td>0.156408</td>
+      <td>0.149950</td>
     </tr>
   </tbody>
 </table>
 </div>
 
 
+
+### 4.4.2.7 CER Gain
+
+
+```python
+cer_gain=[]
+for i in range(transaction_df.shape[1]):
+    string = f'transaction_df["tc_{i*50}_bp"].values[200:]'
+    string2=f'transaction_benchmark_df["tc_{i*50}_bp"].values[200:]'
+    exec(f'U_bar_tc = (-(1+{string})**(-1)).mean()')
+    exec(f'U_bar_bench_tc = (-(1+ {string2})**(-1)).mean()')
+    CER_actual_tc = ((-U_bar_tc)**(-1) -1)*12
+    CER_bench_tc = ((-U_bar_bench_tc)**(-1) -1)*12
+    cer_gain += [CER_actual_tc-CER_bench_tc]
+tc_perf_df['CER_gain'] = cer_gain
+```
+
+### 4.4.3 Plot
 
 
 ```python
@@ -5192,12 +5139,12 @@ plt.legend()
 
 
 
-    <matplotlib.legend.Legend at 0x115977f98>
+    <matplotlib.legend.Legend at 0x11533aef0>
 
 
 
 
-![png](output_253_1.png)
+![png](output_261_1.png)
 
 
 
@@ -5212,12 +5159,31 @@ plt.legend()
 
 
 
-    <matplotlib.legend.Legend at 0x115a5cbe0>
+    <matplotlib.legend.Legend at 0x113c24400>
 
 
 
 
-![png](output_254_1.png)
+![png](output_262_1.png)
+
+
+
+```python
+plt.plot('transaction_cost','CER_gain',data=tc_perf_df)
+plt.title('CER Gain vs transaction cost')
+plt.xticks(np.arange(0,90,10),rotation=30)
+plt.legend()
+```
+
+
+
+
+    <matplotlib.legend.Legend at 0x113dc9a90>
+
+
+
+
+![png](output_263_1.png)
 
 
 ### 5. Data Export
@@ -5230,14 +5196,4 @@ weights_df = pd.DataFrame(w)
 weights_df['Dates'] = processed_df['Dates']
 weights_df.columns = ['w_stock','w_bond','w_bill','Dates']
 weights_df.to_csv('weight.csv')
-```
-
-
-```python
-
-```
-
-
-```python
-
 ```
